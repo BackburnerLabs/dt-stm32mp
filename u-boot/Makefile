@@ -18,7 +18,9 @@ dtb-$(CONFIG_STM32MP25X) += \
 	stm32mp257f-dk-ca35tdcid-ostl.dtb \
 	stm32mp257f-dk-ca35tdcid-ostl-m33-examples.dtb \
 	stm32mp257f-ev1-cm33tdcid-ostl.dtb \
-	stm32mp257f-ev1-cm33tdcid-ostl-serial-ca35tdcid.dtb
+	stm32mp257f-ev1-cm33tdcid-ostl-serial-ca35tdcid.dtb \
+        myb-stm32mp257x-2GB-ca35tdcid-ostl.dtb \
+        myb-stm32mp257x-2GB-ca35tdcid-ostl-m33-examples.dtb
 
 #include $(srctree)/scripts/Makefile.dts
 
