@@ -19,9 +19,9 @@
 #include "stm32mp25xxal-pinctrl.dtsi"
 
 / {
-	model = "STMicroelectronics STM32MP257F-DK CA35TDCID OSTL M33 EXAMPLES Discovery Board";
-	compatible = "st,stm32mp257f-dk-ca35tdcid-ostl-m33-examples", "st,stm32mp257f-dk", "st,stm32mp257";
-
+	model = "MYiR MYD-LF25X STM32MP257x Evaluation Board (1GB)";
+	compatible = "myir,myd-lf25x", "st,stm32mp257";
+	
 	aliases {
 		serial0 = &usart2;
 	};

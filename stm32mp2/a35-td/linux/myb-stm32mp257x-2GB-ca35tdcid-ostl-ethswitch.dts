@@ -5,18 +5,16 @@
 
 /dts-v1/;
 
+#define		ETH_SWITCH_ENABLE  		1
 #define		LVDS_7INCH_PANEL		1
-#define		ETH_SWITCH_ENABLE  		0
-
 
 #include "myb-stm32mp257x-ca35tdcid-ostl-base.dtsi"
-#include "myb-stm32mp257x-1GB-ca35tdcid-ostl-resmem.dtsi"
+#include "myb-stm32mp257x-2GB-ca35tdcid-ostl-resmem.dtsi"
 #include "myb-stm32mp257x-ca35tdcid-ostl-ethswitch.dtsi"
 
-
 / {
-	model = "MYiR MYD-LF25X STM32MP257x Evaluation Board (1GB)";
-	compatible = "st,myb-stm32mp257x-1GB", "myir,myb-stm32mp257x-1GB", "myir,myd-lf25x", "st,stm32mp257";
+	model = "MYiR MYD-LD25X STM32MP257x Evaluation Board (2GB)";
+	compatible = "st,myb-stm32mp257x-2GB", "myir,myb-stm32mp257x-2GB", "myir,myd-ld25x", "st,stm32mp257";
 
 	chosen {
 		stdout-path = "serial0:115200n8";
@@ -24,7 +22,7 @@
 
 	memory@80000000 {
 		device_type = "memory";
-		reg = <0x0 0x80000000 0x0 0x40000000>;
+		reg = <0x0 0x80000000 0x0 0x80000000>;
 	};
 
 };

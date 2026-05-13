@@ -5,14 +5,12 @@
 
 /dts-v1/;
 
+#define		ETH_SWITCH_ENABLE  		1
 #define		LVDS_7INCH_PANEL		1
-#define		ETH_SWITCH_ENABLE  		0
-
 
 #include "myb-stm32mp257x-ca35tdcid-ostl-base.dtsi"
 #include "myb-stm32mp257x-1GB-ca35tdcid-ostl-resmem.dtsi"
 #include "myb-stm32mp257x-ca35tdcid-ostl-ethswitch.dtsi"
-
 
 / {
 	model = "MYiR MYD-LF25X STM32MP257x Evaluation Board (1GB)";

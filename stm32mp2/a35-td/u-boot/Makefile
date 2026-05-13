@@ -24,6 +24,8 @@ dtb-$(CONFIG_STM32MP25X) += \
 	stm32mp257f-ev1-perf-rt.dtb \
 	stm32mp257f-ev1-stpmic2l-ca35tdcid-ostl.dtb \
 	stm32mp257f-ev1-tampers.dtb \
+    myb-stm32mp257x-1GB-ca35tdcid-ostl.dtb \
+    myb-stm32mp257x-2GB-ca35tdcid-ostl-m33-examples.dtb \
     myb-stm32mp257x-2GB-ca35tdcid-ostl.dtb \
     myb-stm32mp257x-2GB-ca35tdcid-ostl-m33-examples.dtb
 

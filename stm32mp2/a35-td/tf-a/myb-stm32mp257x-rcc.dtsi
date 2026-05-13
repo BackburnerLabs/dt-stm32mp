@@ -60,35 +60,35 @@
 	>;
 
 	pll1: st,pll-1 {
-		st,pll = <&pll1_cfg_1200Mhz>;
+		st,pll = <&pll1_cfg_1200MHz>;
 
-		pll1_cfg_1200Mhz: pll1-cfg-1200Mhz {
+		pll1_cfg_1200MHz: pll1-cfg-1200MHz {
 			cfg = <30 1 1 1>;
 			src = <MUX_CFG(MUX_MUXSEL5, MUXSEL_HSE)>;
 		};
 	};
 
 	pll2: st,pll-2 {
-		st,pll = <&pll2_cfg_600Mhz>;
+		st,pll = <&pll2_cfg_600MHz>;
 
-		pll2_cfg_600Mhz: pll2-cfg-600Mhz {
+		pll2_cfg_600MHz: pll2-cfg-600MHz {
 			cfg = <30 1 1 2>;
 			src = <MUX_CFG(MUX_MUXSEL6, MUXSEL_HSE)>;
 		};
 	};
 
 	pll4: st,pll-4 {
-		st,pll = <&pll4_cfg_1200Mhz>;
+		st,pll = <&pll4_cfg_1200MHz>;
 
-		pll4_cfg_1200Mhz: pll4-cfg-1200Mhz {
+		pll4_cfg_1200MHz: pll4-cfg-1200MHz {
 			cfg = <30 1 1 1>;
 			src = <MUX_CFG(MUX_MUXSEL0, MUXSEL_HSE)>;
 		};
 	};
 	pll5: st,pll-5 {
-		st,pll = <&pll5_cfg_532Mhz>;
+		st,pll = <&pll5_cfg_532MHz>;
 
-		pll5_cfg_532Mhz: pll5-cfg-532Mhz {
+		pll5_cfg_532Mhz: pll5-cfg-532MHz {
 			cfg = <133 5 1 2>;
 			src = <MUX_CFG(MUX_MUXSEL1, MUXSEL_HSE)>;
 		};
