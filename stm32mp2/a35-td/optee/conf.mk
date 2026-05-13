@@ -33,8 +33,20 @@ flavorlist-MP25 += $(flavor_dts_file-257F_DK_OSTL)
 flavor_dts_file-257F_DK_RT += stm32mp257f-dk-perf-rt.dts
 flavorlist-MP25 += $(flavor_dts_file-257F_DK_RT)
 
+flavor_dts_file-MYD_2G_OSTL = myb-stm32mp257x-2GB-ca35tdcid-ostl.dts
+flavorlist-MP25 += $(flavor_dts_file-MYD_2G_OSTL)
+
+flavor_dts_file-MYB_2G_OSTL_M33_EXAMPLES = myb-stm32mp257x-2GB-ca35tdcid-ostl-m33-examples.dts
+flavorlist-MP25 += $(flavor_dts_file-MYB_2G_OSTL_M33_EXAMPLES)
+
 flavor_dts_file-257F_DK_OSTL_M33_EXAMPLES = stm32mp257f-dk-ca35tdcid-ostl-m33-examples.dts
 flavorlist-MP25 += $(flavor_dts_file-257F_DK_OSTL_M33_EXAMPLES)
+
+flavor_dts_file-MYB_1G_OSTL_M33_EXAMPLES = myb-stm32mp257x-1GB-ca35tdcid-ostl-m33-examples.dts
+flavorlist-MP25 += $(flavor_dts_file-MYB_1G_OSTL_M33_EXAMPLES)
+
+flavor_dts_file-MYB_2G_OSTL_M33_EXAMPLES = myb-stm32mp257x-2GB-ca35tdcid-ostl-m33-examples.dts
+flavorlist-MP25 += $(flavor_dts_file-MYB_2G_OSTL_M33_EXAMPLES)
 
 flavor_dts_file-257F_EV1_TAMPERS = stm32mp257f-ev1-tampers.dts
 flavorlist-MP25 += $(flavor_dts_file-257F_EV1_TAMPERS)
