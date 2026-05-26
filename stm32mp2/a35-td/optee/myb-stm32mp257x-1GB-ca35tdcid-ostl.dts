@@ -12,9 +12,9 @@
 #include <dt-bindings/tamper/st,stm32mp25-tamp.h>
 #include "stm32mp257.dtsi"
 #include "stm32mp25xf.dtsi"
-#include "stm32mp257f-dk-ca35tdcid-ostl-rcc.dtsi"
-#include "stm32mp257f-dk-ca35tdcid-ostl-resmem.dtsi"
-#include "stm32mp257f-dk-ca35tdcid-ostl-rif.dtsi"
+#include "myb-stm32mp257x-1GB-ca35tdcid-ostl-rcc.dtsi"
+#include "myb-stm32mp257x-1GB-ca35tdcid-ostl-resmem.dtsi"
+#include "myb-stm32mp257x-1GB-ca35tdcid-ostl-rif.dtsi"
 #include "stm32mp25-pinctrl.dtsi"
 #include "stm32mp25-st-scmi-cfg.dtsi"
 #include "stm32mp25xxal-pinctrl.dtsi"
@@ -33,7 +33,7 @@
 
 	memory@80000000 {
 		device_type = "memory";
-		reg = <0x0 0x80000000 0x1 0x00000000>;
+         reg = <0x0 0x80000000 0x0 0x40000000>;
 	};
 
 	shadow-prov {
