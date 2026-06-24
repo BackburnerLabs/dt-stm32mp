@@ -27,7 +27,8 @@ dtb-$(CONFIG_STM32MP25X) += \
     myb-stm32mp257x-1GB-ca35tdcid-ostl.dtb \
     myb-stm32mp257x-2GB-ca35tdcid-ostl-m33-examples.dtb \
     myb-stm32mp257x-2GB-ca35tdcid-ostl.dtb \
-    myb-stm32mp257x-2GB-ca35tdcid-ostl-m33-examples.dtb
+    myb-stm32mp257x-2GB-ca35tdcid-ostl-m33-examples.dtb \
+    savers-myd-lf25x-ca35tdcid-ostl.dtb
 
 #include $(srctree)/scripts/Makefile.dts
 

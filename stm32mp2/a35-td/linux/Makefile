@@ -21,4 +21,5 @@ dtb-$(TARGET_ARM64) += \
 	myb-stm32mp257x-1GB-ca35tdcid-ostl-m33-examples.dtb \
 	myb-stm32mp257x-2GB-ca35tdcid-ostl.dtb \
 	myb-stm32mp257x-2GB-ca35tdcid-ostl-ethswitch.dtb \
-	myb-stm32mp257x-2GB-ca35tdcid-ostl-m33-examples.dtb
+	myb-stm32mp257x-2GB-ca35tdcid-ostl-m33-examples.dtb \
+	savers-myd-lf25x-ca35tdcid-ostl.dtb

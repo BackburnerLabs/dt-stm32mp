@@ -53,3 +53,6 @@ flavorlist-MP25 += $(flavor_dts_file-257F_EV1_TAMPERS)
 
 flavor_dts_file-257F_EV1_RT += stm32mp257f-ev1-perf-rt.dts
 flavorlist-MP25 += $(flavor_dts_file-257F_EV1_RT)
+
+flavor_dts_file-SAVERS_MYD_LF25X = savers-myd-lf25x-ca35tdcid-ostl.dts
+flavorlist-MP25 += $(flavor_dts_file-MYD_2G_OSTL)
