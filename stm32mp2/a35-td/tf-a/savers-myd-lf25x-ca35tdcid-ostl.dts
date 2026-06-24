@@ -10,12 +10,16 @@
 #include "stm32mp257.dtsi"
 #include "stm32mp25xf.dtsi"
 #include "stm32mp257f-dk-ca35tdcid-ostl-rcc.dtsi"
-#include "stm32mp25-lpddr4-1x32Gbits-1x32bits-1200MHz.dtsi"
+/* MYIR MYD-LF25X SoM has 1GB LPDDR4 (1x8Gbits). The DK config this DT was
+ * copied from is 4GB (1x32Gbits), which makes TF-A's DDR address-bus test
+ * probe non-existent memory at 0x100000000 and panic. Match MYIR's vanilla
+ * 1GB config. */
+#include "stm32mp25-lpddr4-1x8Gbits-1x32bits-1200MHz.dtsi"
 #include "stm32mp25-pinctrl.dtsi"
 #include "stm32mp25xxal-pinctrl.dtsi"
 
 / {
-	model = "STMicroelectronics STM32MP257F-DK CA35TDCID OSTL Discovery Board";
+	model = "Savers MYD-LF25X (STM32MP257) CA35TDCID OSTL";
 	compatible = "st,stm32mp257f-dk-ca35tdcid-ostl", "st,stm32mp257f-dk", "st,stm32mp257";
 
 	aliases {
