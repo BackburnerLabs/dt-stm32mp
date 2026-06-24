@@ -142,18 +142,6 @@
 		};
 	};
 
-	hdmi: connector {
-		compatible = "hdmi-connector";
-		label = "hdmi";
-		type = "a";
-
-		port {
-			hdmi_connector_in: endpoint {
-				remote-endpoint = <&lt9611_out>;
-			};
-		};
-	};
-
 	imx335_2v9: imx335-2v9 {
 		compatible = "regulator-fixed";
 		regulator-name = "imx335-avdd";
@@ -507,23 +495,6 @@
 
 };
 
-&i2s1 {
-	#clock-cells = <0>;
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&i2s1_pins_a>;
-	pinctrl-1 = <&i2s1_sleep_pins_a>;
-	#sound-dai-cells = <0>;
-	status = "okay";
-
-        i2s1_port: port {
-                i2s1_endpoint: endpoint {
-                remote-endpoint = <&es8328_endpoint>;
-                                format = "i2s";
-                                mclk-fs = <256>;
-                };
-        };
-};
-
 
 
 &a35ss_syscfg {
@@ -587,31 +558,6 @@
 		dcmipp_0: endpoint {
 			remote-endpoint = <&csi_source>;
 			bus-type = <4>;
-		};
-	};
-};
-
-&dsi {
-	vdd-supply =  <&scmi_vddcore>;
-	vdda18-supply = <&scmi_v1v8>;
-	status = "okay";
-
-	ports {
-		#address-cells = <1>;
-		#size-cells = <0>;
-
-		port@0 {
-			reg = <0>;
-			dsi_in: endpoint {
-				remote-endpoint = <&ltdc_ep0_out>;
-			};
-		};
-
-		port@1 {
-			reg = <1>;
-			dsi_out1: endpoint {
-				remote-endpoint = <&lt9611_a>;
-			};
 		};
 	};
 };
@@ -699,28 +645,6 @@
 		status = "okay";
 	};
 
-    es8328_codec: es8328@10 {
-        status = "okay";
-        #sound-dai-cells = <0>;
-        compatible = "everest,es8388";
-        reg = <0x10>;
-        // clocks = <&clk_ext_sound>;
-        // clock-names = "mclk";
-        clocks = <&i2s1>;
-        clock-names = "MCLK";
-
-        port {
-            #address-cells = <0x1>;
-            #size-cells = <0x0>;
-            port@0 {
-                reg = <0>;
-                es8328_endpoint: endpoint {
-                        remote-endpoint = <&i2s1_endpoint>;
-                };
-            };
-        };
-    };
-
     stusb1600: stusb1600@28 {
         compatible = "st,stusb1600";
         reg = <0x28>;
@@ -796,29 +720,6 @@
 				link-frequencies = /bits/ 64 <456000000>;
 			};
 		};
-	};
-};
-
-&i2s2 {
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&i2s2_pins_a>;
-	pinctrl-1 = <&i2s2_sleep_pins_a>;
-	status = "disabled";
-};
-
-&i2s3 {
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&i2s3_pins_a>;
-	pinctrl-1 = <&i2s3_sleep_pins_a>;
-	status = "okay";
-
-	i2s3_port0: port@0 {
-			i2s3_cpu_endpoint: endpoint {
-					remote-endpoint = <&codec_endpoint>;
-					dai-format = "i2s";
-					mclk-fs = <256>;
-					system-clock-frequency = <12288000>;
-			};
 	};
 };
 
