@@ -85,7 +85,7 @@
 			ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
 			ti,tx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
 			ti,fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
-			reset-gpios = <&gpioi 4 GPIO_ACTIVE_LOW>;
+			reset-gpios = <&gpioi 4 GPIO_ACTIVE_LOW>;	/* ETH1_PHY_RST (PI4) */
 			reset-assert-us = <10000>;
 			reset-deassert-us = <80000>;
 		};

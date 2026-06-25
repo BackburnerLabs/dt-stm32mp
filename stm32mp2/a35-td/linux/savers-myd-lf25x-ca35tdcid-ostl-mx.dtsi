@@ -137,9 +137,9 @@
 	};
 	tim4_pwm_pins_mx: tim4_pwm_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('D', 4, AF9)>, /* TIM4_CH1 */
-				 <STM32_PINMUX('D', 5, AF9)>, /* TIM4_CH2 */
-				 <STM32_PINMUX('D', 7, AF9)>; /* TIM4_CH4 */
+			pinmux = <STM32_PINMUX('D', 4, AF9)>, /* TIM4_CH1 (RGB1_R) */
+				 <STM32_PINMUX('D', 5, AF9)>, /* TIM4_CH2 (RGB1_G) */
+				 <STM32_PINMUX('D', 7, AF9)>; /* TIM4_CH4 (LED_ILL) */
 			bias-disable;
 			drive-push-pull;
 			slew-rate = <0>;
@@ -147,15 +147,15 @@
 	};
 	tim4_pwm_sleep_pins_mx: tim4_pwm_sleep_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('D', 4, ANALOG)>, /* TIM4_CH1 */
-				 <STM32_PINMUX('D', 5, ANALOG)>, /* TIM4_CH2 */
-				 <STM32_PINMUX('D', 7, ANALOG)>; /* TIM4_CH4 */
+			pinmux = <STM32_PINMUX('D', 4, ANALOG)>, /* TIM4_CH1 (RGB1_R) */
+				 <STM32_PINMUX('D', 5, ANALOG)>, /* TIM4_CH2 (RGB1_G) */
+				 <STM32_PINMUX('D', 7, ANALOG)>; /* TIM4_CH4 (LED_ILL) */
 		};
 	};
 
 	tim5_pwm_pins_mx: tim5_pwm_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('G', 9, AF8)>; /* TIM5_CH4 */
+			pinmux = <STM32_PINMUX('G', 9, AF8)>; /* TIM5_CH4 (PWM_FAN) */
 			bias-disable;
 			drive-push-pull;
 			slew-rate = <0>;
@@ -163,7 +163,7 @@
 	};
 	tim5_pwm_sleep_pins_mx: tim5_pwm_sleep_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('G', 9, ANALOG)>; /* TIM5_CH4 */
+			pinmux = <STM32_PINMUX('G', 9, ANALOG)>; /* TIM5_CH4 (PWM_FAN) */
 		};
 	};
 
@@ -332,7 +332,7 @@
 
 	tim3_pins_mx: tim3_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('C', 11, AF7)>; /* TIM3_CH1 */
+			pinmux = <STM32_PINMUX('C', 11, AF7)>; /* TIM3_CH1 (encoder A/B) */
 			bias-disable;
 			drive-push-pull;
 			slew-rate = <0>;
@@ -340,7 +340,7 @@
 	};
 	tim3_sleep_pins_mx: tim3_sleep_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('C', 11, ANALOG)>; /* TIM3_CH1 */
+			pinmux = <STM32_PINMUX('C', 11, ANALOG)>; /* TIM3_CH1 (encoder A/B) */
 		};
 	};
 
@@ -360,7 +360,7 @@
 
 	tim17_pins_mx: tim17_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('H', 7, AF7)>; /* TIM17_CH1 */
+			pinmux = <STM32_PINMUX('H', 7, AF7)>; /* TIM17_CH1 (encoder A/B) */
 			bias-disable;
 			drive-push-pull;
 			slew-rate = <0>;
@@ -368,7 +368,7 @@
 	};
 	tim17_sleep_pins_mx: tim17_sleep_mx-0 {
 		pins {
-			pinmux = <STM32_PINMUX('H', 7, ANALOG)>; /* TIM17_CH1 */
+			pinmux = <STM32_PINMUX('H', 7, ANALOG)>; /* TIM17_CH1 (encoder A/B) */
 		};
 	};
 };
@@ -542,68 +542,70 @@
  */
 
 /* ----------------- GPIO line names (from CubeMX labels) ----------------- */
-/* Names document the schematic net per pin; app/userspace drives the lines. */
+/* Each entry names a bank line in pin order; the trailing comment gives the
+ * pin range, so e.g. PI9 = DOOR_OPEN is readable at a glance. Empty entries
+ * are unlabeled or muxed to a peripheral (see the pinctrl groups above). */
 
 &gpioa {
 	gpio-line-names =
-		"", "STM_AX_FLT1", "STM_AX_RST2", "STM_AX_WAKE0",
-		"", "STM_AX_RST0", "STM_AX_RST1", "STM_AX_FLT0";
+		"", "STM_AX_FLT1", "STM_AX_RST2", "STM_AX_WAKE0",	/* PA0-PA3 */
+		"", "STM_AX_RST0", "STM_AX_RST1", "STM_AX_FLT0";		/* PA4-PA7 */
 };
 
 &gpiob {
 	gpio-line-names =
-		"", "SLED_LEFT", "", "DISPLAY_CS",
-		"GP0", "GP1", "", "",
-		"", "STM_AX_EN0", "", "EXPAN_CS";
+		"", "SLED_LEFT", "", "DISPLAY_CS",	/* PB0-PB3 */
+		"GP0", "GP1", "", "",			/* PB4-PB7 */
+		"", "STM_AX_EN0", "", "EXPAN_CS";	/* PB8-PB11 */
 };
 
 &gpioc {
 	gpio-line-names =
-		"", "", "", "",
-		"SOLENOID2", "BUTTON_USER1", "STM_AX_FLT2", "EEPROM_WC",
-		"", "SOLENOID0", "USB3_EN";
+		"", "", "", "",						/* PC0-PC3 */
+		"SOLENOID2", "BUTTON_USER1", "STM_AX_FLT2", "EEPROM_WC",	/* PC4-PC7 */
+		"", "SOLENOID0", "USB3_EN";				/* PC8-PC10 */
 };
 
 &gpiod {
 	gpio-line-names =
-		"STM_AX_SPI1_CS", "", "STM_AX_EN2", "uSD_DETECT",
-		"", "", "", "",
-		"RES_N", "", "STM_AX_EN1";
+		"STM_AX_SPI1_CS", "", "STM_AX_EN2", "uSD_DETECT",	/* PD0-PD3 */
+		"", "", "", "",						/* PD4-PD7 */
+		"RES_N", "", "STM_AX_EN1";				/* PD8-PD10 */
 };
 
 &gpiof {
 	gpio-line-names =
-		"", "", "", "",
-		"", "", "STM_AX_WAKE2", "MOM2",
-		"ADC_ALERT", "SOLENOID1", "", "PEDESTAL_TRIGGER_L",
-		"", "", "", "MOM0";
+		"", "", "", "",						/* PF0-PF3 */
+		"", "", "STM_AX_WAKE2", "MOM2",				/* PF4-PF7 */
+		"ADC_ALERT", "SOLENOID1", "", "PEDESTAL_TRIGGER_L",	/* PF8-PF11 */
+		"", "", "", "MOM0";					/* PF12-PF15 */
 };
 
 &gpiog {
 	gpio-line-names =
-		"", "", "BT_HOST_WAKE", "GP2",
-		"BT_REG_ON", "MOM1", "", "BT_PCM_WS",
-		"WL_REG_ON", "", "SLED_RIGHT", "WL_HOST_WAKE",
-		"PEDESTAL_CLAMP";
+		"", "", "BT_HOST_WAKE", "GP2",			/* PG0-PG3 */
+		"BT_REG_ON", "MOM1", "", "BT_PCM_WS",		/* PG4-PG7 */
+		"WL_REG_ON", "", "SLED_RIGHT", "WL_HOST_WAKE",	/* PG8-PG11 */
+		"PEDESTAL_CLAMP";				/* PG12 */
 };
 
 &gpioh {
 	gpio-line-names =
-		"", "", "USBSW_OE", "USB3SW_S",
-		"LED1", "DISPLAY_DC", "", "",
-		"STM_AX_WAKE1";
+		"", "", "USBSW_OE", "USB3SW_S",		/* PH0-PH3 */
+		"LED1", "DISPLAY_DC", "", "",		/* PH4-PH7 (PH6/PH7 = encoder, TIM16/17) */
+		"STM_AX_WAKE1";				/* PH8 */
 };
 
 &gpioi {
 	gpio-line-names =
-		"TAG_PRESENCE", "", "", "",
-		"ETH1_PHY_RST", "", "", "",
-		"", "DOOR_OPEN", "SLED_NEEDLING";
+		"TAG_PRESENCE", "", "", "",		/* PI0-PI3 */
+		"ETH1_PHY_RST", "", "", "",		/* PI4-PI7 */
+		"", "DOOR_OPEN", "SLED_NEEDLING";	/* PI8-PI10 */
 };
 
 &gpioz {
 	gpio-line-names =
-		"PANEL_OPEN", "PEDESTAL_TRIGGER_R", "GP3", "",
-		"", "SLED_LOADING", "", "CAM_HOMING",
-		"CUTTER_HOMING", "GP4";
+		"PANEL_OPEN", "PEDESTAL_TRIGGER_R", "GP3", "",	/* PZ0-PZ3 */
+		"", "SLED_LOADING", "", "CAM_HOMING",		/* PZ4-PZ7 */
+		"CUTTER_HOMING", "GP4";				/* PZ8-PZ9 */
 };
