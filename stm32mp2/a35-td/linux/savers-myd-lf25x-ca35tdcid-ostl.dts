@@ -86,3 +86,70 @@
 		};
 	};
 };
+
+/*
+ * ---------------------------------------------------------------------------
+ * Disable MYiR eval-board carrier peripherals inherited from
+ * myb-stm32mp257x-base.dtsi. They sit on pins the Savers board reassigns
+ * (CubeMX takes priority for GPIO/UART/SPI/...), so they are turned off here
+ * to free those pins. The Savers carrier (WiFi/BT, USB-C mux, Ethernet)
+ * follows the STM32MP257F-DK and is wired up separately.
+ * ---------------------------------------------------------------------------
+ */
+
+/* Heartbeat LEDs (option C): keep led-green on PH4 (LED1) as a system-alive
+ * blink; drop led-blue so PZ5 (SLED_LOADING) is free for the application. */
+&{/gpio-leds} {
+	/delete-node/ led-blue;
+};
+
+&{/gpio-keys} {
+	status = "disabled";			/* MYiR eval button on PB15 */
+};
+
+&ov5640 {
+	status = "disabled";			/* camera: PD0=STM_AX_SPI1_CS, PD2=STM_AX_EN2 */
+};
+
+&reg_cam_3V3 {
+	status = "disabled";			/* camera 3V3 enable on PD1=SPI1_MISO */
+};
+
+&reg_bt_3V3 {
+	status = "disabled";			/* MYiR BT 3V3 on PD7=LED_ILL; Savers BT = BT_REG_ON/PG4 */
+};
+
+&usdhc1_pwrseq {
+	status = "disabled";			/* MYiR WiFi pwrseq reset on PD5=RGB1_G (DK wifi added later) */
+};
+
+&panel_lvds {
+	status = "disabled";			/* MYiR LVDS panel (Savers uses an SPI display) */
+};
+
+&panel_dsi_backlight {
+	status = "disabled";			/* backlight on PI5=SPI5_MOSI */
+};
+
+&panel_lvds_backlight {
+	status = "disabled";			/* backlight on PH5=DISPLAY_DC */
+};
+
+&uart9 {
+	status = "disabled";			/* MYiR extra UART; RTS on PI10=SLED_NEEDLING */
+};
+
+&i2c2 {
+	stusb1600@28 {
+		status = "disabled";		/* USB-C PD: reset PZ2=GP3, and no PD circuit on Savers */
+	};
+};
+
+&i2c3 {
+	/* MYiR's edt-ft5x06 touch is not compiled in (the gt911 variant is, and
+	 * it's already disabled) -> PB0/SPI2_SCK is actually free. Only the lt9611
+	 * HDMI bridge is active here. */
+	hdmi-bridge@39 {
+		status = "disabled";		/* lt9611 HDMI reset PI0=TAG_PRESENCE */
+	};
+};
