@@ -73,6 +73,21 @@
 		#size-cells = <0>;
 		compatible = "snps,dwmac-mdio";
 
+		/*
+		 * Reset the DP83867 at the MDIO-bus level. __mdiobus_register()
+		 * asserts/deasserts the bus "reset" GPIO BEFORE scanning the bus,
+		 * so the PHY is awake when its ID is read. A reset-gpios in the
+		 * PHY node would only be applied during phy_device registration,
+		 * which for a generic "ti,dp83867" compatible happens AFTER the
+		 * MDIO ID read in get_phy_device() -- too late, so the PHY is
+		 * never seen and __stmmac_open() fails with -ENODEV.
+		 * NB: the GPIO must live in only ONE node; a second gpiod request
+		 * on PI4 from the PHY node would fail with -EBUSY.
+		 */
+		reset-gpios = <&gpioi 4 GPIO_ACTIVE_LOW>;	/* ETH1_PHY_RST (PI4) */
+		reset-delay-us = <10000>;
+		reset-post-delay-us = <80000>;
+
 		phy1_eth1: ethernet-phy@0 {
 			compatible = "ti,dp83867";
 			reg = <0>;	/* DP83867 MDIO address strapped to 0 */
@@ -80,9 +95,6 @@
 			ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
 			ti,tx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
 			ti,fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
-			reset-gpios = <&gpioi 4 GPIO_ACTIVE_LOW>;	/* ETH1_PHY_RST (PI4) */
-			reset-assert-us = <10000>;
-			reset-deassert-us = <80000>;
 		};
 	};
 };
