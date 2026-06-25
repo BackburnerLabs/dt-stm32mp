@@ -10,16 +10,15 @@
  * the AF numbers and electrical pin config below.
  *
  * Scope (simple, low-speed carrier interfaces):
- *   I2C1/2/3/8, USART1/3/6, SPI1/2/3/5, ADC3, TIM3/4/5/16/17/20, gpio-line-names.
+ *   I2C1/2/3/8, USART1/3/6, SPI1/2/3/5, ADC3, TIM4/5/20 PWM, gpio-line-names.
  *
  * NOT taken from CubeMX (left to their existing owners):
  *   - Ethernet, SDMMC1 (SD), SDMMC3 (SDIO), USB, DDR, eMMC, PMIC/RCC (SoM).
  *   - USART2 is the console; it is already configured by the MYiR SoM base.
  *
- * NOTE: CubeMX assigned SPI1, ADC3 and TIM3/TIM16/TIM17 to the Cortex-M33.
- * They are exposed to Linux here by explicit request. TIM16 is the encoder
- * (ENC_N) — if the M33/Zephyr firmware also drives any of these, that is a
- * resource-ownership conflict (a peripheral must have exactly one owner).
+ * NOTE: CubeMX assigned SPI1, ADC3 and TIM3/16/17 to the Cortex-M33. SPI1 and
+ * ADC3 are exposed to Linux here (Zephyr no longer uses them). The quadrature
+ * encoder on TIM3/16/17 is left disabled in Linux — see the note near &adc3.
  */
 
 &pinctrl {
@@ -472,25 +471,39 @@
 	status = "okay";
 };
 
+/*
+ * PWM outputs (RGB / illumination LEDs on TIM4, fan on TIM5_CH4, TIM20_CH1N).
+ * Per the st,stm32mp25-timers binding, pinctrl lives on the `pwm` child node,
+ * not the parent timer.
+ */
 &timers4 {
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&tim4_pins_mx>, <&tim4_pwm_pins_mx>;
-	pinctrl-1 = <&tim4_sleep_pins_mx>, <&tim4_pwm_sleep_pins_mx>;
 	status = "okay";
+	pwm {
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&tim4_pwm_pins_mx>, <&tim4_pins_mx>;
+		pinctrl-1 = <&tim4_pwm_sleep_pins_mx>, <&tim4_sleep_pins_mx>;
+		status = "okay";
+	};
 };
 
 &timers5 {
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&tim5_pwm_pins_mx>;
-	pinctrl-1 = <&tim5_pwm_sleep_pins_mx>;
 	status = "okay";
+	pwm {
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&tim5_pwm_pins_mx>;
+		pinctrl-1 = <&tim5_pwm_sleep_pins_mx>;
+		status = "okay";
+	};
 };
 
 &timers20 {
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&tim20_pwm_pins_mx>;
-	pinctrl-1 = <&tim20_pwm_sleep_pins_mx>;
 	status = "okay";
+	pwm {
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&tim20_pwm_pins_mx>;
+		pinctrl-1 = <&tim20_pwm_sleep_pins_mx>;
+		status = "okay";
+	};
 };
 
 /* --- Peripherals CubeMX assigned to the M33, exposed in Linux on request --- */
@@ -499,14 +512,15 @@
 	pinctrl-names = "default", "sleep";
 	pinctrl-0 = <&spi1_pins_mx>;
 	pinctrl-1 = <&spi1_sleep_pins_mx>;
+	cs-gpios = <&gpiod 0 GPIO_ACTIVE_LOW>;	/* STM_AX_SPI1_CS (PD0) */
 	status = "okay";
 };
 
 &adc_3 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&adc3_pins_mx>;
-	vdda-supply = <&scmi_v1v8>;
-	vref-supply = <&scmi_v1v8>;	/* TODO: verify ADC vref rail vs schematic */
+	vdda-supply = <&scmi_v3v3>;
+	vref-supply = <&scmi_v3v3>;	/* ADC reference rail = 3V3 */
 	status = "okay";
 };
 
@@ -518,26 +532,14 @@
 	};
 };
 
-&timers3 {
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&tim3_pins_mx>;
-	pinctrl-1 = <&tim3_sleep_pins_mx>;
-	status = "okay";
-};
-
-&timers16 {
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&tim16_pins_mx>;
-	pinctrl-1 = <&tim16_sleep_pins_mx>;
-	status = "okay";
-};
-
-&timers17 {
-	pinctrl-names = "default", "sleep";
-	pinctrl-0 = <&tim17_pins_mx>;
-	pinctrl-1 = <&tim17_sleep_pins_mx>;
-	status = "okay";
-};
+/*
+ * Quadrature encoder (ENC_A=PC11/TIM3_CH1, ENC_B=PH7/TIM17_CH1,
+ * ENC_N=PH6/TIM16_CH1N) is intentionally NOT enabled in Linux. TIM16/TIM17 are
+ * basic single-channel timers and cannot do hardware quadrature mode, so this
+ * is a real-time edge-capture job better suited to the Cortex-M33. Pin groups
+ * tim3/tim16/tim17_*_mx remain defined above for reference. Revisit once the
+ * encoder ownership is decided (see commit notes / README).
+ */
 
 /* ----------------- GPIO line names (from CubeMX labels) ----------------- */
 /* Names document the schematic net per pin; app/userspace drives the lines. */
