@@ -63,7 +63,13 @@
 	pinctrl-names = "default", "sleep";
 	phy-mode = "rgmii-id";
 	max-speed = <1000>;
-	phy-handle = <&phy1_eth1>;
+	/*
+	 * BRING-UP: phy-handle intentionally omitted so stmmac_init_phy()
+	 * falls back to phy_find_first() and scans the whole MDIO bus,
+	 * logging the PHY's actual address + ID. Restore the explicit
+	 * phy-handle + ethernet-phy@N node below once the address is known.
+	 */
+	/* phy-handle = <&phy1_eth1>; */
 	st,eth-clk-sel;
 	st,ext-phyclk = <&clk_ext_phy1>;
 	snps,ext-systime;
@@ -88,14 +94,21 @@
 		reset-delay-us = <10000>;
 		reset-post-delay-us = <80000>;
 
+		/*
+		 * BRING-UP: explicit PHY node disabled so the bus auto-scans.
+		 * Once dmesg reports the real address N, restore this as
+		 * "ethernet-phy@N { ... reg = <N>; }" and re-enable phy-handle.
+		 */
+		/*
 		phy1_eth1: ethernet-phy@0 {
 			compatible = "ti,dp83867";
-			reg = <0>;	/* DP83867 MDIO address strapped to 0 */
+			reg = <0>;
 			phy-mode = "rgmii-id";
 			ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
 			ti,tx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
 			ti,fifo-depth = <DP83867_PHYCR_FIFO_DEPTH_4_B_NIB>;
 		};
+		*/
 	};
 };
 
