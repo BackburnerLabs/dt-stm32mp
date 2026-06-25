@@ -88,7 +88,7 @@
 	pll5: st,pll-5 {
 		st,pll = <&pll5_cfg_532MHz>;
 
-		pll5_cfg_532Mhz: pll5-cfg-532MHz {
+		pll5_cfg_532MHz: pll5-cfg-532MHz {
 			cfg = <133 5 1 2>;
 			src = <MUX_CFG(MUX_MUXSEL1, MUXSEL_HSE)>;
 		};
