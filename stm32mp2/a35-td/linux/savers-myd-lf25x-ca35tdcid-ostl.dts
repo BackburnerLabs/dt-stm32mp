@@ -153,3 +153,51 @@
 		status = "disabled";		/* lt9611 HDMI reset PI0=TAG_PRESENCE */
 	};
 };
+
+/*
+ * ---------------------------------------------------------------------------
+ * WiFi / Bluetooth (Murata / Broadcom), wired like the STM32MP257F-DK — same
+ * module and pins on the Savers board:
+ *   WiFi   : SDMMC3 SDIO, WL_REG_ON = PG8 (wifi_pwrseq)
+ *   BT     : USART1, BT_REG_ON = PG4 (shutdown-gpios)
+ *   32 kHz : RTC LSCO on RTC_OUT2 (PI8) feeds the module's LPO
+ * NOTE: the brcmfmac / Murata firmware blobs must be installed in the rootfs
+ * (image recipe) for WiFi/BT to actually come up.
+ * ---------------------------------------------------------------------------
+ */
+/ {
+	wifi_pwrseq: wifi-pwrseq {
+		compatible = "mmc-pwrseq-simple";
+		reset-gpios = <&gpiog 8 GPIO_ACTIVE_LOW>;	/* WL_REG_ON (PG8) */
+		clocks = <&rtc>;
+		clock-names = "ext_clock";
+	};
+};
+
+&rtc {
+	#clock-cells = <0>;
+	st,lsco = <RTC_OUT2_RMP>;			/* 32 kHz LPO out on RTC_OUT2 (PI8) */
+	pinctrl-0 = <&rtc_out2_rmp_pins_a>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&sdmmc3 {
+	/* Use the Savers/DK WL_REG_ON (PG8) pwrseq, not MYiR's disabled one (PD5). */
+	mmc-pwrseq = <&wifi_pwrseq>;
+	vmmc-supply = <&scmi_v3v3>;
+	cap-sdio-irq;
+	non-removable;
+};
+
+&usart1 {
+	bluetooth {
+		compatible = "brcm,bcm43438-bt";
+		shutdown-gpios = <&gpiog 4 GPIO_ACTIVE_HIGH>;	/* BT_REG_ON (PG4) */
+		clocks = <&rtc>;
+		clock-names = "lpo";
+		max-speed = <2000000>;
+		vbat-supply = <&scmi_v3v3>;
+		vddio-supply = <&scmi_v3v3>;
+	};
+};
