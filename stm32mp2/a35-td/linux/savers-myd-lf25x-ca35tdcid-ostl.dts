@@ -51,7 +51,7 @@
 };
 
 /*
- * Savers Ethernet: single TI DP83867 on eth1 at MDIO address 1, using the
+ * Savers Ethernet: single TI DP83867 on eth1 at MDIO address 0, using the
  * STM32MP257F-DK RGMII/MDIO pin group (eth1_rgmii_pins_b, which also carries
  * MDC/MDIO). The kernel SoC eth1 node is bare/disabled by default, so this
  * defines the MAC and MDIO bus from scratch.
@@ -73,9 +73,9 @@
 		#size-cells = <0>;
 		compatible = "snps,dwmac-mdio";
 
-		phy1_eth1: ethernet-phy@1 {
+		phy1_eth1: ethernet-phy@0 {
 			compatible = "ti,dp83867";
-			reg = <1>;
+			reg = <0>;	/* DP83867 MDIO address strapped to 0 */
 			phy-mode = "rgmii-id";
 			ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
 			ti,tx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
