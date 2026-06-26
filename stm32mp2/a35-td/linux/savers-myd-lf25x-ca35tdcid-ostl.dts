@@ -64,8 +64,14 @@
 	phy-mode = "rgmii-id";
 	max-speed = <1000>;
 	phy-handle = <&phy1_eth1>;
-	st,eth-clk-sel;
-	st,ext-phyclk = <&clk_ext_phy1>;
+	/*
+	 * No RGMII clock-select properties: this board (like the STM32MP257F-DK)
+	 * is the "Normal" RGMII case -- the DP83867 has its own 25 MHz crystal and
+	 * supplies 125 MHz to the SoC via CLK_OUT. st,eth-clk-sel / st,ext-phyclk
+	 * (inherited from the MYiR myb base) are for the "No 125 MHz from PHY" case
+	 * where the SoC must source 125 MHz from RCC -- wrong for us, and risks the
+	 * SoC driving its own clock onto the PHY's CLK_OUT net.
+	 */
 	snps,ext-systime;
 
 	mdio1 {
