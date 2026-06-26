@@ -95,7 +95,15 @@
 		reset-post-delay-us = <80000>;
 
 		phy1_eth1: ethernet-phy@0 {
-			compatible = "ti,dp83867";
+			/*
+			 * Must be a PHY-class compatible so of_mdiobus_child_is_phy()
+			 * registers a phy_device (not a generic mdio_device) and
+			 * phylink can attach. "ti,dp83867" is NOT recognized as a PHY
+			 * (the DP83867 driver matches by the MDIO PHY ID, 0x2000a231,
+			 * not a DT compatible) -> it registered as a bare mdio device
+			 * with no phy_id/driver -> __stmmac_open failed with -ENODEV (-19).
+			 */
+			compatible = "ethernet-phy-id2000.a231", "ethernet-phy-ieee802.3-c22";
 			reg = <0>;	/* DP83867 MDIO address strapped to 0 (confirmed: schematic + straps) */
 			phy-mode = "rgmii-id";
 			ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
