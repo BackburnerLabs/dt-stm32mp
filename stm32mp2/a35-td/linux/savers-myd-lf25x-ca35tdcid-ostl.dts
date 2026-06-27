@@ -165,6 +165,26 @@
 	status = "disabled";			/* MYiR extra UART; RTS on PI10=SLED_NEEDLING */
 };
 
+&i2s1 {
+	status = "disabled";			/* pins conflict: D9=SPI1_MOSI, F12=SPI5_MISO, G6=SPI5_SCK */
+};
+
+&i2s3 {
+	status = "disabled";			/* pins conflict: B7=SPI3_SCK, B8=SPI3_MOSI, B10=SPI3_MISO */
+};
+
+&spi7 {
+	status = "disabled";			/* pin conflict: G13=I2C1_SCL */
+};
+
+&uart4 {
+	status = "disabled";			/* pins conflict: B6=TIM20_CH1N, D11=SPI1_SCK */
+};
+
+&uart8 {
+	status = "disabled";			/* pin conflict: F10=ADC3_INP2 */
+};
+
 &i2c2 {
 	stusb1600@28 {
 		status = "disabled";		/* USB-C PD: reset PZ2=GP3, and no PD circuit on Savers */
