@@ -39,4 +39,13 @@
 		device_type = "memory";
 		reg = <0x0 0x80000000 0x0 0x40000000>;
 	};
+
+	&tamp {
+		/*
+		 * PI8 (External Tamper 1) is not wired on the Savers carrier board.
+		 * Remove the node so the floating pin cannot trigger a forced reset.
+		 */
+		/delete-node/ tamp-button;
+	};
+
 };
