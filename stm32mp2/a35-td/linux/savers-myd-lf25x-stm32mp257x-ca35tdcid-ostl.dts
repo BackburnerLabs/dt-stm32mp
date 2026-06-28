@@ -1,61 +1,165 @@
 // SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
-/*
- * Copyright (C) Savers 2024 - All Rights Reserved
- *
- * Savers MYD-LF25X (Linux / CA35TDCID OSTL).
- *
- * Re-based onto MYiR's vanilla myb-stm32mp257x-1GB device tree (myb-base +
- * 1GB-resmem). MYiR's networking (myb-stm32mp257x-ethswitch.dtsi, dual
- * Motorcomm PHYs) is intentionally NOT included; the Savers carrier uses a
- * single TI DP83867 on eth1 instead (see &eth1 below).
- *
- * The reserved-memory carveouts come from MYiR's myb-stm32mp257x-1GB-resmem.dtsi
- * so they stay consistent with the rebased OP-TEE / U-Boot device trees.
- *
- * SoM: MYiR MYD-LF25X, STM32MP257F (AK package, kernel), 1GB LPDDR4.
- *
- * Board peripherals that were carried over from the original STM32MP257F-DK
- * copy (camera, Wi-Fi, USB hub, LEDs, ADC, USB-C, RTC, M33 examples) have been
- * dropped for a clean MYiR-based bring-up baseline; re-add them deliberately as
- * each is verified against the Savers schematic.
- */
 
 /dts-v1/;
 
 #include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/leds/common.h>
+#include <dt-bindings/rtc/rtc-stm32.h>
 #include <dt-bindings/net/ti-dp83867.h>
-#include "myb-stm32mp257x-ca35tdcid-ostl-base.dtsi"
+#include "stm32mp257.dtsi"
+#include "stm32mp25xf.dtsi"
+#include "stm32mp25-pinctrl.dtsi"
+#include "stm32mp25xxak-pinctrl.dtsi"
 #include "savers-myd-lf25x-stm32mp257x-ca35tdcid-ostl-resmem.dtsi"
-/* Carrier-board simple interfaces (I2C/USART/SPI/timers + GPIO names) from
- * STM32CubeMX (Savers.ioc). See the file header for scope/exclusions. */
 #include "savers-myd-lf25x-stm32mp257x-ca35tdcid-ostl-mx.dtsi"
-
+ 
 / {
-	model = "Savers MYD-LF25X (STM32MP257) CA35TDCID OSTL";
-	compatible = "savers,savers-myd-lf25x", "st,myb-stm32mp257x-1GB",
-		     "myir,myb-stm32mp257x-1GB", "myir,myd-lf25x", "st,stm32mp257";
+	model = "Savers ATS Controller with MYiR MYD-LF25X";
+	compatible = "st,savers-myd-lf25x", "savers,savers-myd-lf25x", "myir,myd-lf25x", "st,stm32mp257";
 
 	aliases {
-		ethernet0 = &eth1;
+		ethernet1 = &eth1;
 		serial0 = &usart2;
-	};
-
-	chosen {
-		stdout-path = "serial0:115200n8";
+		serial1 = &usart1;
+		serial3 = &usart3;
+		serial6 = &usart6;
+		i2c1 = &i2c1;
+		i2c2 = &i2c2;
+		i2c3 = &i2c3;
+		i2c8 = &i2c8;
+        mmc0 = &sdmmc1;
+        mmc1 = &sdmmc2;
+        mmc2 = &sdmmc3;
 	};
 
 	memory@80000000 {
 		device_type = "memory";
 		reg = <0x0 0x80000000 0x0 0x40000000>;
 	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+	};
+
+	gpio-leds {
+		compatible = "gpio-leds";
+
+		led-green {
+			function = LED_FUNCTION_HEARTBEAT;
+			color = <LED_COLOR_ID_GREEN>;
+			gpios = <&gpioh 4 GPIO_ACTIVE_LOW>;
+			linux,default-trigger = "heartbeat";
+			default-state = "off";
+		};
+	};
+
 };
 
-/*
- * Savers Ethernet: single TI DP83867 on eth1 at MDIO address 0, using the
- * STM32MP257F-DK RGMII/MDIO pin group (eth1_rgmii_pins_b, which also carries
- * MDC/MDIO). The kernel SoC eth1 node is bare/disabled by default, so this
- * defines the MAC and MDIO bus from scratch.
- */
+&i2s1 {
+	status = "disabled";
+};
+
+&a35ss_syscfg {
+	status = "okay";
+};
+
+&ahbsr {
+	mbox_client: mailbox-client@1 {
+		compatible = "mbox-cdev";
+		reg = <1 0>;
+		memory-region =  <&ipc_shmem_2>;
+		mboxes = <&ipcc2 0>;
+		mbox-names = "rx-tx";
+		status = "okay";
+	};
+};
+
+&arm_wdt {
+	timeout-sec = <32>;
+	status = "okay";
+};
+
+&combophy {
+	clocks = <&rcc CK_BUS_USB3PCIEPHY>, <&rcc CK_KER_USB3PCIEPHY>;
+    clock-names = "apb-clk", "ker-clk";
+	st,rx_equalizer = <1>;
+	status = "okay";
+};
+
+&crc {
+	status = "okay";
+};
+
+&cs_cpu_debug0 {
+	status = "okay";
+};
+
+&cs_cpu_debug1 {
+	status = "okay";
+};
+
+&cs_cti0 {
+	status = "okay";
+};
+
+&cs_cti1 {
+	status = "okay";
+};
+
+&cs_cti_cpu0 {
+	status = "okay";
+};
+
+&cs_cti_cpu1 {
+	status = "okay";
+};
+
+&cs_etf {
+	status = "okay";
+};
+
+&cs_etm0 {
+	status = "okay";
+};
+
+&cs_etm1 {
+	status = "okay";
+};
+
+&cs_etr {
+	status = "okay";
+};
+
+&cs_funnel {
+	status = "okay";
+};
+
+&cs_replicator {
+	status = "okay";
+};
+
+&cs_stm {
+	status = "okay";
+};
+
+&cs_tpiu {
+	status = "okay";
+};
+
+&csi {
+	status = "disabled";
+};
+
+&dcmipp {
+	status = "disabled";
+};
+
+&dsi {
+	status = "disabled";
+};
+
+
 &eth1 {
 	status = "okay";
 	pinctrl-0 = <&eth1_rgmii_pins_b>;
@@ -64,14 +168,6 @@
 	phy-mode = "rgmii-id";
 	max-speed = <1000>;
 	phy-handle = <&phy1_eth1>;
-	/*
-	 * No RGMII clock-select properties: this board (like the STM32MP257F-DK)
-	 * is the "Normal" RGMII case -- the DP83867 has its own 25 MHz crystal and
-	 * supplies 125 MHz to the SoC via CLK_OUT. st,eth-clk-sel / st,ext-phyclk
-	 * (inherited from the MYiR myb base) are for the "No 125 MHz from PHY" case
-	 * where the SoC must source 125 MHz from RCC -- wrong for us, and risks the
-	 * SoC driving its own clock onto the PHY's CLK_OUT net.
-	 */
 	snps,ext-systime;
 
 	mdio1 {
@@ -79,32 +175,13 @@
 		#size-cells = <0>;
 		compatible = "snps,dwmac-mdio";
 
-		/*
-		 * Reset the DP83867 at the MDIO-bus level. __mdiobus_register()
-		 * asserts/deasserts the bus "reset" GPIO BEFORE scanning the bus,
-		 * so the PHY is awake when its ID is read. A reset-gpios in the
-		 * PHY node would only be applied during phy_device registration,
-		 * which for a generic "ti,dp83867" compatible happens AFTER the
-		 * MDIO ID read in get_phy_device() -- too late, so the PHY is
-		 * never seen and __stmmac_open() fails with -ENODEV.
-		 * NB: the GPIO must live in only ONE node; a second gpiod request
-		 * on PI4 from the PHY node would fail with -EBUSY.
-		 */
 		reset-gpios = <&gpioi 4 GPIO_ACTIVE_LOW>;	/* ETH1_PHY_RST (PI4) */
 		reset-delay-us = <10000>;
 		reset-post-delay-us = <80000>;
 
 		phy1_eth1: ethernet-phy@0 {
-			/*
-			 * Must be a PHY-class compatible so of_mdiobus_child_is_phy()
-			 * registers a phy_device (not a generic mdio_device) and
-			 * phylink can attach. "ti,dp83867" is NOT recognized as a PHY
-			 * (the DP83867 driver matches by the MDIO PHY ID, 0x2000a231,
-			 * not a DT compatible) -> it registered as a bare mdio device
-			 * with no phy_id/driver -> __stmmac_open failed with -ENODEV (-19).
-			 */
 			compatible = "ethernet-phy-id2000.a231", "ethernet-phy-ieee802.3-c22";
-			reg = <0>;	/* DP83867 MDIO address strapped to 0 (confirmed: schematic + straps) */
+			reg = <0>;
 			phy-mode = "rgmii-id";
 			ti,rx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
 			ti,tx-internal-delay = <DP83867_RGMIIDCTL_2_00_NS>;
@@ -113,90 +190,146 @@
 	};
 };
 
-/*
- * ---------------------------------------------------------------------------
- * Disable MYiR eval-board carrier peripherals inherited from
- * myb-stm32mp257x-base.dtsi. They sit on pins the Savers board reassigns
- * (CubeMX takes priority for GPIO/UART/SPI/...), so they are turned off here
- * to free those pins. The Savers carrier (WiFi/BT, USB-C mux, Ethernet)
- * follows the STM32MP257F-DK and is wired up separately.
- * ---------------------------------------------------------------------------
- */
-
-/* Heartbeat LEDs (option C): keep led-green on PH4 (LED1) as a system-alive
- * blink; drop led-blue so PZ5 (SLED_LOADING) is free for the application. */
-&{/gpio-leds} {
-	/delete-node/ led-blue;
+&gpu {
+	contiguous-area = <&gpu_reserved>;
+	status = "okay";
 };
 
-&{/gpio-keys} {
-	status = "disabled";			/* MYiR eval button on PB15 */
+&hpdma {
+	memory-region = <&hpdma1_lli>;
 };
 
-&ov5640 {
-	status = "disabled";			/* camera: PD0=STM_AX_SPI1_CS, PD2=STM_AX_EN2 */
+&hpdma2 {
+	memory-region = <&hpdma2_lli>;
 };
 
-&reg_cam_3V3 {
-	status = "disabled";			/* camera 3V3 enable on PD1=SPI1_MISO */
-};
-
-&reg_bt_3V3 {
-	status = "disabled";			/* MYiR BT 3V3 on PD7=LED_ILL; Savers BT = BT_REG_ON/PG4 */
-};
-
-&usdhc1_pwrseq {
-	status = "disabled";			/* MYiR WiFi pwrseq reset on PD5=RGB1_G (DK wifi added later) */
-};
-
-&panel_lvds {
-	status = "disabled";			/* MYiR LVDS panel (Savers uses an SPI display) */
-};
-
-&panel_dsi_backlight {
-	status = "disabled";			/* backlight on PI5=SPI5_MOSI */
-};
-
-&panel_lvds_backlight {
-	status = "disabled";			/* backlight on PH5=DISPLAY_DC */
-};
-
-&uart9 {
-	status = "disabled";			/* MYiR extra UART; RTS on PI10=SLED_NEEDLING */
-};
-
-&i2s1 {
-	status = "disabled";			/* pins conflict: D9=SPI1_MOSI, F12=SPI5_MISO, G6=SPI5_SCK */
-};
-
-&i2s3 {
-	status = "disabled";			/* pins conflict: B7=SPI3_SCK, B8=SPI3_MOSI, B10=SPI3_MISO */
-};
-
-&spi7 {
-	status = "disabled";			/* pin conflict: G13=I2C1_SCL */
-};
-
-&uart4 {
-	status = "disabled";			/* pins conflict: B6=TIM20_CH1N, D11=SPI1_SCK */
-};
-
-&uart8 {
-	status = "disabled";			/* pin conflict: F10=ADC3_INP2 */
+&hpdma3 {
+	memory-region = <&hpdma3_lli>;
 };
 
 &i2c2 {
-	stusb1600@28 {
-		status = "disabled";		/* USB-C PD: reset PZ2=GP3, and no PD circuit on Savers */
+	i2c-scl-rising-time-ns = <100>;
+	i2c-scl-falling-time-ns = <13>;
+	clock-frequency = <100000>;
+	status = "okay";
+	/* spare dmas for other usage */
+	/delete-property/dmas;
+	/delete-property/dma-names;
+
+	eeprom@50 {
+		compatible = "atmel,24c256";
+		reg = <0x50>;
+		status = "okay";
 	};
 };
 
 &i2c3 {
-	/* MYiR's edt-ft5x06 touch is not compiled in (the gt911 variant is, and
-	 * it's already disabled) -> PB0/SPI2_SCK is actually free. Only the lt9611
-	 * HDMI bridge is active here. */
-	hdmi-bridge@39 {
-		status = "disabled";		/* lt9611 HDMI reset PI0=TAG_PRESENCE */
+	i2c-scl-rising-time-ns = <185>;
+	i2c-scl-falling-time-ns = <20>;
+	clock-frequency = <100000>;
+	status = "okay";
+	/* spare dmas for other usage */
+	/delete-property/dmas;
+	/delete-property/dma-names;
+
+	pcf8563: pcf8563@51 {
+			compatible = "nxp,pcf8563";
+			reg = <0x51>;
+			status = "okay";
+	};
+};
+
+&i2c8 {
+	i2c-scl-rising-time-ns = <185>;
+	i2c-scl-falling-time-ns = <20>;
+	clock-frequency = <100000>;
+	status = "okay";
+};
+
+&i2s2 {
+	status = "disabled";
+};
+
+&i2s3 {
+	status = "disabled";
+};
+
+&ipcc1 {
+	status = "okay";
+};
+
+&ipcc2 {
+	status = "okay";
+};
+
+/* use LPTIMER with tick broadcast for suspend mode */
+&lptimer3 {
+	status = "okay";
+	timer {
+		status = "okay";
+	};
+};
+
+&lpuart1 {
+	status = "disabled";
+};
+
+&m0_rproc {
+	mboxes = <&ipcc2 0>, <&ipcc2 1>, <&ipcc2 2>;
+	mbox-names = "rx", "tx", "shutdown";
+	memory-region = <&cm0_cube_fw>, <&cm0_cube_data>;
+	clocks = <&rcc CK_CPU3>,
+		 <&rcc CK_CPU3_AM>,
+		 <&scmi_clk CK_SCMI_IPCC2>,
+		 <&scmi_clk CK_SCMI_IPCC2_AM>;
+	status = "okay";
+};
+
+&m33_rproc {
+	mboxes = <&ipcc1 0x100>, <&ipcc1 0x101>, <&ipcc1 2>;
+	mbox-names = "vq0", "vq1", "shutdown";
+	memory-region = <&cm33_cube_fw>, <&cm33_cube_data>,
+			<&ipc_shmem_1>, <&vdev0vring0>,
+			<&vdev0vring1>, <&vdev0buffer>,
+			<&cm33_sram2>;
+	st,syscfg-nsvtor = <&a35ss_syscfg 0xa8 0xffffff80>;
+	status = "okay";
+};
+
+
+
+&mlahb {
+	intc_rpmsg: interrupt-controller@1 {
+		compatible = "rpmsg,intc";
+		reg = <1 0>;
+		#interrupt-cells = <1>;
+		interrupt-controller;
+	};
+
+	i2c_rpmsg: i2c@2 {
+		compatible = "rpmsg,i2c-controller";
+		reg = <2 0>;
+		rpmsg,dev-id = "rpmsg_i2c";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		status = "okay";
+
+		typec@35 {
+			compatible = "st,stm32mp25-typec";
+			reg = <0x35>;
+			interrupts-extended = <&intc_rpmsg 0>;
+			status = "okay";
+			connector {
+				compatible = "usb-c-connector";
+				label = "USB-C";
+
+				port {
+					typec_ep: endpoint {
+						remote-endpoint = <&dwc3_ep>;
+					};
+				};
+			};
+		};
 	};
 };
 
@@ -228,6 +361,70 @@
 	status = "okay";
 };
 
+&scmi_regu {
+	scmi_vddio1: regulator@0 {
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+	};
+	scmi_vddcore: regulator@11  {
+		reg = <VOLTD_SCMI_STPMIC2_BUCK2>;
+		regulator-name = "vddcore";
+	};
+	scmi_v1v8: regulator@14  {
+		reg = <VOLTD_SCMI_STPMIC2_BUCK5>;
+		regulator-name = "v1v8";
+	};
+	scmi_v3v3: regulator@16 {
+		reg = <VOLTD_SCMI_STPMIC2_BUCK7>;
+		regulator-name = "v3v3";
+	};
+	scmi_vdd_emmc: regulator@18 {
+		reg = <VOLTD_SCMI_STPMIC2_LDO2>;
+		regulator-name = "vdd_emmc";
+	};
+	scmi_vdd3v3_usb: regulator@20 {
+		reg = <VOLTD_SCMI_STPMIC2_LDO4>;
+		regulator-name = "vdd3v3_usb";
+	};
+	scmi_vdd_sdcard: regulator@23 {
+		reg = <VOLTD_SCMI_STPMIC2_LDO7>;
+		regulator-name = "vdd_sdcard";
+	};
+};
+
+&sdmmc1 {
+	pinctrl-names = "default", "opendrain", "sleep";
+	pinctrl-0 = <&sdmmc1_b4_pins_b>;
+	pinctrl-1 = <&sdmmc1_b4_od_pins_b>;
+	pinctrl-2 = <&sdmmc1_b4_sleep_pins_a>;
+	cd-gpios = <&gpiod 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+	max-frequency = <50000000>;
+	disable-wp;
+	st,neg-edge;
+	bus-width = <4>;
+	vmmc-supply = <&scmi_vdd_sdcard>;
+	vqmmc-supply = <&scmi_vddio1>;
+	status = "okay";
+};
+
+&sdmmc2 {
+	pinctrl-names = "default", "opendrain", "sleep";
+	pinctrl-0 = <&sdmmc2_b4_pins_a &sdmmc2_d47_pins_a>;
+	pinctrl-1 = <&sdmmc2_b4_od_pins_a &sdmmc2_d47_pins_a>;
+	pinctrl-2 = <&sdmmc2_b4_sleep_pins_a &sdmmc2_d47_sleep_pins_a>;
+	non-removable;
+	no-sd;
+	no-sdio;
+	st,neg-edge;
+	bus-width = <8>;
+	vmmc-supply = <&scmi_vdd_emmc>;
+	vqmmc-supply = <&scmi_vddio2>;
+	mmc-ddr-1_8v;
+        mmc-hs200-1_8v;
+	status = "okay";
+};
+
+/* Wifi */
 &sdmmc3 {
 	/* Use the Savers/DK WL_REG_ON (PG8) pwrseq, not MYiR's disabled one (PD5). */
 	mmc-pwrseq = <&wifi_pwrseq>;
@@ -236,7 +433,37 @@
 	non-removable;
 };
 
+&spi7 {
+	status = "disabled";
+};
+
+&spi3 {
+	status = "disabled";
+};
+
+&spi8 {
+	status = "disabled";
+};
+
+&usart2 {
+	pinctrl-names = "default", "idle", "sleep";
+	pinctrl-0 = <&usart2_pins_a>;
+	pinctrl-1 = <&usart2_idle_pins_a>;
+	pinctrl-2 = <&usart2_sleep_pins_a>;
+	/delete-property/dmas;
+	/delete-property/dma-names;
+	status = "okay";
+};
+
+&usart6 {
+	uart-has-rtscts;
+};
+
 &usart1 {
+	/delete-property/dmas;
+	/delete-property/dma-names;
+	uart-has-rtscts;
+	status = "okay";
 	bluetooth {
 		compatible = "brcm,bcm43438-bt";
 		shutdown-gpios = <&gpiog 4 GPIO_ACTIVE_HIGH>;	/* BT_REG_ON (PG4) */
@@ -246,4 +473,73 @@
 		vbat-supply = <&scmi_v3v3>;
 		vddio-supply = <&scmi_v3v3>;
 	};
+};
+
+&uart4 {
+	status = "disabled";
+};
+
+&uart8 {
+	status = "disabled";
+};
+
+&uart9 {
+	status = "disabled";
+};
+
+&usb2_phy1 {
+	vdd33-supply = <&scmi_vdd3v3_usb>;
+	status = "okay";
+};
+
+&usb2_phy2 {
+	vdd33-supply = <&scmi_vdd3v3_usb>;
+	status = "okay";
+};
+
+&usbh {
+	status = "okay";
+
+	usbh_ehci: usb@482f0000 {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		/* onboard HUB */
+		hub@1 {
+			compatible = "usb424,2514";
+			reg = <1>;
+			vdd-supply = <&scmi_v3v3>;
+		};
+	};
+
+	usbh_ohci: usb@482e0000 {
+		status = "disabled";
+	};
+};
+
+&usb3dr {
+	status = "okay";
+
+	dwc3: usb@48300000 {
+		phys            = <&usb2_phy2>, <&combophy PHY_TYPE_USB3>;
+		phy-names       = "usb2-phy", "usb3-phy";
+        maximum-speed = "super-speed";
+        snps,incr-burst-type-adjustment = <4>;
+        dr_mode = "otg";
+		usb-role-switch;
+        role-switch-default-mode = "peripheral";
+        //role-switch-default-mode = "host";
+        snps,dis_u2_susphy_quirk;
+        snps,dis_u3_susphy_quirk;
+        snps,dis_enblslpm_quirk;
+        snps,dis-tx-ipgap-linecheck-quirk;
+		port {
+			dwc3_ep: endpoint {
+				remote-endpoint = <&typec_ep>;
+			};
+		};
+	};
+};
+
+&adc_12{
+	status = "disabled";
 };
