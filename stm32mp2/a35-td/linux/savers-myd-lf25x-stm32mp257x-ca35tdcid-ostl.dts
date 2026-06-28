@@ -24,8 +24,8 @@
 
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/net/ti-dp83867.h>
-#include "myb-stm32mp257x-base.dtsi"
-#include "myb-stm32mp257x-1GB-resmem.dtsi"
+#include "myb-stm32mp257x-ca35tdcid-ostl-base.dtsi"
+#include "savers-myd-lf25x-stm32mp257x-ca35tdcid-ostl-resmem.dtsi"
 /* Carrier-board simple interfaces (I2C/USART/SPI/timers + GPIO names) from
  * STM32CubeMX (Savers.ioc). See the file header for scope/exclusions. */
 #include "savers-myd-lf25x-stm32mp257x-ca35tdcid-ostl-mx.dtsi"
