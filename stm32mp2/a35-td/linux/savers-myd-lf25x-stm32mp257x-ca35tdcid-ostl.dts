@@ -28,7 +28,7 @@
 #include "myb-stm32mp257x-1GB-resmem.dtsi"
 /* Carrier-board simple interfaces (I2C/USART/SPI/timers + GPIO names) from
  * STM32CubeMX (Savers.ioc). See the file header for scope/exclusions. */
-#include "savers-myd-lf25x-ca35tdcid-ostl-mx.dtsi"
+#include "savers-myd-lf25x-stm32mp257x-ca35tdcid-ostl-mx.dtsi"
 
 / {
 	model = "Savers MYD-LF25X (STM32MP257) CA35TDCID OSTL";
