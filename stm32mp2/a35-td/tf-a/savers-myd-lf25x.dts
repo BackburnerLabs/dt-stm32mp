@@ -13,7 +13,7 @@
 #include "stm32mp25-lpddr4-1x8Gbits-1x32bits-1200MHz.dtsi"
 #include "stm32mp25-pinctrl.dtsi"
 #include "stm32mp25xxai-pinctrl.dtsi"
-#include "savers-lf25x-rcc.dtsi"
+#include "savers-myd-lf25x-rcc.dtsi"
 
 / {
     model = "Savers ATS Controller with MYiR MYD-LF25X";
