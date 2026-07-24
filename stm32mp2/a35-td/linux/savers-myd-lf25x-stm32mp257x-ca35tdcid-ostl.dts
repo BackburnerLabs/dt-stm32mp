@@ -574,3 +574,85 @@
 		st,min-sample-time-ns = <10000>;
 	};
 };
+
+/* THERM (NTC 10k, connected-positive per the schematic's 3V3-NTC-PG1-10k-GND
+ * divider) exposed as a hwmon/thermal sensor via the ntc-thermistor driver.
+ * "murata,ncp15xh103" is the closest bound compatible: the driver keys its
+ * R-T curve on the "XH103" suffix (10k/B-constant), not the "15" vs "18"
+ * package-size digit (see TYPE_NCPXXXH103 in ntc_thermistor.c), so it's the
+ * correct curve for our NCP18XH103J03RB part.
+ */
+/ {
+	thermistor: thermistor {
+		compatible = "murata,ncp15xh103";
+		io-channels = <&adc1 6>;
+		pullup-uv = <3300000>;
+		pullup-ohm = <0>;
+		pulldown-ohm = <10000>;
+		connected-positive;
+		#thermal-sensor-cells = <0>;
+	};
+
+	/*
+	 * PWM_FAN (PG9/TIM5_CH4) drives a 4-wire 24V fan (QFR0824HHP0) through
+	 * an open-drain optocoupler (FODM121, schematic sheet 21 "PWM FAN").
+	 * Unlike LED_ILL, there's no documented inversion here — an
+	 * optocoupler sinking the line low for X% of the period is the
+	 * standard 4-wire-fan PWM convention, so normal polarity is correct.
+	 * TACH isn't wired to any MCU pin on this board revision, so RPM
+	 * feedback isn't available — this is open-loop speed control only.
+	 */
+	fan0: pwm-fan {
+		compatible = "pwm-fan";
+		pwms = <&pwm5 3 40000 0>;	/* 25kHz, per the 4-wire fan PWM spec */
+		#cooling-cells = <2>;
+		/* Duty-cycle steps (0-255) for cooling states 0..3 below. */
+		cooling-levels = <0 85 170 255>;
+	};
+
+	/*
+	 * Starting-point trip curve for THERM-driven fan ramp — not a
+	 * calibrated thermal design. Tune temperature/hysteresis once the
+	 * enclosure's real thermal behavior is characterized.
+	 */
+	thermal-zones {
+		board-thermal {
+			polling-delay-passive = <1000>;
+			polling-delay = <5000>;
+			thermal-sensors = <&thermistor>;
+
+			trips {
+				board_fan_low: board-fan-low {
+					temperature = <45000>;
+					hysteresis = <3000>;
+					type = "active";
+				};
+				board_fan_mid: board-fan-mid {
+					temperature = <55000>;
+					hysteresis = <3000>;
+					type = "active";
+				};
+				board_fan_high: board-fan-high {
+					temperature = <65000>;
+					hysteresis = <3000>;
+					type = "active";
+				};
+			};
+
+			cooling-maps {
+				map0 {
+					trip = <&board_fan_low>;
+					cooling-device = <&fan0 1 1>;
+				};
+				map1 {
+					trip = <&board_fan_mid>;
+					cooling-device = <&fan0 2 2>;
+				};
+				map2 {
+					trip = <&board_fan_high>;
+					cooling-device = <&fan0 3 3>;
+				};
+			};
+		};
+	};
+};
