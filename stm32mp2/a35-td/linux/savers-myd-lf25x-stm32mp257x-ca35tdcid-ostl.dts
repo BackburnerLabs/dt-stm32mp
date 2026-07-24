@@ -555,6 +555,22 @@
 	};
 };
 
-&adc_12{
-	status = "disabled";
+/* THERM: NTC 10k (NCP18XH103J03RB) from 3V3 to PG1, 10k 1% from PG1 to GND. */
+&adc_12 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&adc12_pins_mx>;
+	vdda-supply = <&scmi_v3v3>;
+	vref-supply = <&scmi_v3v3>;	/* ADC reference rail = 3V3 (matches divider supply) */
+	status = "okay";
+};
+
+&adc1 {
+	status = "okay";
+	channel@6 {
+		reg = <6>;		/* PG1 = ADC1_INP6 (THERM) */
+		/* Divider source impedance (~5-20k over temp) is higher than a
+		 * directly-driven signal, so use a longer sample time than
+		 * ADC3's channel@2 (400ns) to let the S/H cap settle. */
+		st,min-sample-time-ns = <10000>;
+	};
 };

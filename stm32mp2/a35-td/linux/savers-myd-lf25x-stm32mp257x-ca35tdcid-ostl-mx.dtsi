@@ -304,6 +304,12 @@
 		};
 	};
 
+	adc12_pins_mx: adc12_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('G', 1, ANALOG)>; /* ADC1_INP6 (THERM) */
+		};
+	};
+
 	/* --- Peripherals CubeMX assigned to the M33, exposed in Linux on request --- */
 
 	spi1_pins_mx: spi1_mx-0 {
