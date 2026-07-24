@@ -21,6 +21,8 @@
  * encoder on TIM3/16/17 is left disabled in Linux — see the note near &adc3.
  */
 
+#include <dt-bindings/pwm/pwm.h>
+
 &pinctrl {
 	i2c1_pins_mx: i2c1_mx-0 {
 		pins {
@@ -484,11 +486,30 @@
  */
 &timers4 {
 	status = "okay";
-	pwm {
+	pwm4: pwm {
 		pinctrl-names = "default", "sleep";
 		pinctrl-0 = <&tim4_pwm_pins_mx>, <&tim4_pins_mx>;
 		pinctrl-1 = <&tim4_pwm_sleep_pins_mx>, <&tim4_sleep_pins_mx>;
 		status = "okay";
+	};
+};
+
+/*
+ * LED_ILL (TIM4_CH4/PD7) drives an opto-isolator + MOSFET stage that is
+ * hardware-inverted (schematic sheet 17 "RGB Outputs": PWM high => LED off,
+ * PWM low => LED on, "*INVERTED PWM TO POWER"). PWM_POLARITY_INVERTED here
+ * makes the LED class's brightness 0 = off / max = full, so callers don't
+ * need to invert duty-cycle math themselves.
+ */
+/ {
+	pwm-leds {
+		compatible = "pwm-leds";
+
+		led-0 {
+			label = "led_ill";
+			pwms = <&pwm4 3 100000 PWM_POLARITY_INVERTED>;
+			max-brightness = <255>;
+		};
 	};
 };
 
