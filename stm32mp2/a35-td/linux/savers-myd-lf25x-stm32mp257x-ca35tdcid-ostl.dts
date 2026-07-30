@@ -559,7 +559,7 @@
 &adc_12 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&adc12_pins_mx>;
-	vdda-supply = <&scmi_v3v3>;
+	vdda-supply = <&scmi_v1v8>;	/* ADC analog bias rail - NOT the divider supply, see vref-supply */
 	vref-supply = <&scmi_v3v3>;	/* ADC reference rail = 3V3 (matches divider supply) */
 	status = "okay";
 };
