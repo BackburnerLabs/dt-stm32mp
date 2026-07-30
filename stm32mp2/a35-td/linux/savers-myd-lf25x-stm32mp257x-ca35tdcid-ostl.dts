@@ -168,6 +168,17 @@
 	phy-mode = "rgmii-id";
 	max-speed = <1000>;
 	phy-handle = <&phy1_eth1>;
+
+	/*
+	 * Take the RGMII 125 MHz from the RCC PLL, not from the PHY's CLK_OUT
+	 * on ETH_CLK125 (PH9). The DP83867 powers up with IO_MUX_CFG (MMD 0x1F,
+	 * 0x0170) = 0x0c0e, i.e. CLK_O_SEL = REF_CLK, which drives 25 MHz --
+	 * measured on two boards. Without this the MAC clocked GTX_CLK at
+	 * 25 MHz on a 1Gbps link and the PHY transmitted nothing valid.
+	 * The STM32MP257F-DK needs no such property because its Realtek
+	 * RTL8211F does drive a free-running 125 MHz.
+	 */
+	st,eth-clk-sel;
 	snps,ext-systime;
 
 	mdio1 {
