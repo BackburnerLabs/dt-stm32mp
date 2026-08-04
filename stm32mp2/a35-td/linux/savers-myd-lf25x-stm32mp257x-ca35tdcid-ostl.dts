@@ -248,6 +248,12 @@
 			reg = <0x51>;
 			status = "okay";
 	};
+
+	eeprom@50 {
+		compatible = "atmel,24c64";
+		reg = <0x50>;
+		status = "okay";
+	};
 };
 
 &i2c8 {
