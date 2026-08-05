@@ -544,13 +544,9 @@
 		phy-names       = "usb2-phy", "usb3-phy";
         maximum-speed = "super-speed";
         snps,incr-burst-type-adjustment = <4>;
-        dr_mode = "peripheral";
-      	usb-role-switch;                  /* Enables dynamic state changes based on connectivity */
-    	role-switch-default-mode = "none"; /* Waits for VBUS/CC detection rather than forcing a pull-up */
-    
-        // dr_mode = "otg";
-        // usb-role-switch;
-        // role-switch-default-mode = "peripheral";
+        dr_mode = "otg";
+		usb-role-switch;
+        role-switch-default-mode = "peripheral";
         //role-switch-default-mode = "host";
         snps,dis_u2_susphy_quirk;
         snps,dis_u3_susphy_quirk;
