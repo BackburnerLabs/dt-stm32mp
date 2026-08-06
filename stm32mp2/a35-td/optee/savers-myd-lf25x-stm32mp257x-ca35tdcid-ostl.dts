@@ -42,6 +42,26 @@
 
 };
 
+/*
+ * Keep the UCPD 3V3 rail up for the Cortex-M33.
+ *
+ * myb-stm32mp257x-base.dtsi already sets vdd33ucpd to "okay", but nothing on
+ * the A35 side -- neither OP-TEE nor Linux -- consumes it, so an unclaimed
+ * regulator can be turned off. The only user is M33 firmware driving UCPD for
+ * USB-C CC detection, and it has no way to request the rail.
+ *
+ * Both M33-capable reference trees add this: MYIR's own
+ * myb-stm32mp257x-1GB-ca35tdcid-ostl-m33-examples.dts and ST's
+ * stm32mp257f-dk-ca35tdcid-ostl-m33-examples.dts. The plain (non-m33) variants
+ * this board was derived from omit it, which is consistent with the symptom --
+ * ST's USBPD_DRP_UCSI firmware boots and brings up rpmsg, but never announces
+ * its rpmsg_i2c channel, so no UCSI interface is registered and Linux sees no
+ * Type-C port.
+ */
+&vdd33ucpd {
+	regulator-always-on;
+};
+
 &tamp {
 	/delete-node/ tamp-button;
 };
