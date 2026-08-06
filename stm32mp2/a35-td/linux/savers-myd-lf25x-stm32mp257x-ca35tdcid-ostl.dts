@@ -360,13 +360,15 @@
 
 	/*
 	 * Virtual I2C bus tunnelled over rpmsg to the Cortex-M33 -- not a pin
-	 * bus. It exists only so M33 firmware can expose devices to Linux.
+	 * bus. ST's USBPD_DRP_UCSI M33 firmware presents a UCSI controller at
+	 * "address 0x35" on it, which ucsi_stm32g0 binds to as 1-0035.
 	 *
-	 * The DK hangs a typec@35 node here: ST's USBPD_DRP_UCSI M33 firmware
-	 * presents a UCSI controller at "address 0x35" which ucsi_stm32g0 then
-	 * drives. That node is deliberately absent on this board -- see &usb3dr
-	 * for why (peripheral-only, and the DK firmware wants a TCPP03-M20 we
-	 * do not fit). Without it nothing claims this bus, which is harmless.
+	 * This is the board's only route to Type-C state: the SoC's UCPD has no
+	 * A35-side driver, so CC detection, the PD policy engine and role
+	 * reporting all run on the M33. The firmware needs the meta-savers patch
+	 * that teaches its power BSP about a native connector -- stock ST builds
+	 * assume a TCPP0203 protection IC this board does not fit, and fail
+	 * BSP_USBPD_PWR_Init before ever registering UCSI.
 	 */
 	i2c_rpmsg: i2c@2 {
 		compatible = "rpmsg,i2c-controller";
@@ -375,6 +377,23 @@
 		#address-cells = <1>;
 		#size-cells = <0>;
 		status = "okay";
+
+		typec@35 {
+			compatible = "st,stm32mp25-typec";
+			reg = <0x35>;
+			interrupts-extended = <&intc_rpmsg 0>;
+			status = "okay";
+			connector {
+				compatible = "usb-c-connector";
+				label = "USB-C";
+
+				port {
+					typec_ep: endpoint {
+						remote-endpoint = <&dwc3_ep>;
+					};
+				};
+			};
+		};
 	};
 };
 
@@ -585,20 +604,27 @@
         maximum-speed = "super-speed";
         snps,incr-burst-type-adjustment = <4>;
         /*
-         * Peripheral-only. The board is self-powered and always acts as a USB
-         * device, so there is no role switching and nothing needs CC state.
-         *
-         * Dual-role would require the Type-C stack, which on this SoC only
-         * exists as UCSI served by Cortex-M33 firmware over rpmsg (there is no
-         * A35-side UCPD driver). ST's USBPD_DRP_UCSI firmware additionally
-         * drives a TCPP03-M20 port-protection IC that this board does not
-         * fit, so it cannot be used here as-is. See the removed typec@35 node.
+         * Defaults to peripheral: the board is self-powered and acts as a USB
+         * device. It still needs the role switch, because that is the only
+         * source of attach events on this SoC -- there is no autonomous VBUS
+         * sensing in dwc3, the stm32 glue or the USB2 PHY. Attach is reported
+         * by the Type-C stack, which lives in Cortex-M33 firmware and reaches
+         * Linux as UCSI over rpmsg (see typec@35). Without it the UDC stays at
+         * "not attached" forever and the gadget never enumerates, even with a
+         * host driving 5V onto VBUS.
          */
-        dr_mode = "peripheral";
+        dr_mode = "otg";
+        usb-role-switch;
+        role-switch-default-mode = "peripheral";
         snps,dis_u2_susphy_quirk;
         snps,dis_u3_susphy_quirk;
         snps,dis_enblslpm_quirk;
         snps,dis-tx-ipgap-linecheck-quirk;
+		port {
+			dwc3_ep: endpoint {
+				remote-endpoint = <&typec_ep>;
+			};
+		};
 	};
 };
 
