@@ -369,6 +369,26 @@
 	 * that teaches its power BSP about a native connector -- stock ST builds
 	 * assume a TCPP0203 protection IC this board does not fit, and fail
 	 * BSP_USBPD_PWR_Init before ever registering UCSI.
+	 *
+	 * PARKED, NOT WORKING. This node is kept as the hook for future dual-role
+	 * support; nothing binds to it today. The M33 firmware hangs early in
+	 * MX_UCPD1_Init (instrumented: a marker after HAL_Init is reached, the one
+	 * after MX_UCPD1_Init never is), so rpmsg_i2c is never announced, no UCSI
+	 * controller appears and /sys/class/typec stays empty.
+	 *
+	 * The cause is NOT a missing SCMI UCPD voltage domain -- that was checked
+	 * and disproved: myb-stm32mp257x-base.dtsi includes ST's
+	 * stm32mp25-st-scmi-cfg.dtsi, whose agent@2 (the M33's SCMI agent) already
+	 * declares VOLTD_SCMI_UCPD -> vdd33ucpd, confirmed in the built DTB.
+	 *
+	 * SWD debug of the M33 is not currently possible either: BSEC_DENR gates
+	 * the core debug enables, BSEC3 is secure-only (a non-secure read of
+	 * 0x44000E20 hangs the bus), and every AP reports "unable to get core ID"
+	 * in both hotplug and under-reset connects. Opening it needs either an
+	 * OP-TEE patch writing BSEC_DENR or PSA ADAC debug authentication.
+	 *
+	 * None of this blocks USB device mode, which works without the M33 -- see
+	 * the dwc3 node below.
 	 */
 	i2c_rpmsg: i2c@2 {
 		compatible = "rpmsg,i2c-controller";
@@ -604,14 +624,27 @@
         maximum-speed = "super-speed";
         snps,incr-burst-type-adjustment = <4>;
         /*
-         * Defaults to peripheral: the board is self-powered and acts as a USB
-         * device. It still needs the role switch, because that is the only
-         * source of attach events on this SoC -- there is no autonomous VBUS
-         * sensing in dwc3, the stm32 glue or the USB2 PHY. Attach is reported
-         * by the Type-C stack, which lives in Cortex-M33 firmware and reaches
-         * Linux as UCSI over rpmsg (see typec@35). Without it the UDC stays at
-         * "not attached" forever and the gadget never enumerates, even with a
-         * host driving 5V onto VBUS.
+         * Self-powered USB device. This combination is what makes the gadget
+         * work, and all three properties are required:
+         *
+         *   dr_mode = "otg"  + usb-role-switch  + role-switch-default-mode
+         *
+         * There is no autonomous VBUS sensing on this SoC -- not in dwc3, the
+         * stm32 glue (dwc3-stm32.c only does port-power/overcurrent/VBUSEN
+         * polarity) nor the USB2 PHY -- so nothing here ever detects a cable.
+         * role-switch-default-mode makes dwc3 assume the peripheral role at
+         * probe instead of waiting for an attach event that never arrives.
+         * Same approach MYIR uses on the MYD-LF25X, which has no UCPD at all.
+         *
+         * Do NOT "simplify" this to dr_mode = "peripheral": that was tried and
+         * leaves the UDC at "not attached" forever, even with a host driving
+         * 5V onto VBUS. The role switch is what arms the gadget.
+         *
+         * Verified: the UDC "state" attribute reads "configured", the host takes
+         * a DHCP lease over the gadget ethernet and pings at 0% loss. This
+         * needs no Cortex-M33 firmware and no Type-C stack; typec@35 above is
+         * parked and does not bind. Type-C is only needed to add dual-role
+         * (host mode, e.g. plugging in a thumbdrive) later.
          */
         dr_mode = "otg";
         usb-role-switch;
