@@ -233,6 +233,52 @@
 	};
 };
 
+/*
+ * USB-C SuperSpeed lane mux.
+ *
+ * Without these two hogs the port only ever enumerates at high speed (480
+ * Mbit/s), even though dwc3 comes up "configured in usb3 mode", the UDC
+ * reports maximum-speed super-speed and combophy probes cleanly. The SS pairs
+ * simply are not connected through the mux.
+ *
+ * Neither line was driven by anything -- both sat in analog mode (MODER reset
+ * default), so board resistors alone decided the state: USBSW_OE pulled HIGH
+ * and USB3SW_S pulled LOW. Measured on the running board via GPIOH at
+ * 0x442b0000 (MODER 0x0AABFDFF, PUPDR 0, IDR bit2=1 bit3=0).
+ *
+ * USBSW_OE is ACTIVE LOW, so the board's own pull-up was holding the mux
+ * disabled. Driving OE low and S high was verified on the bench to bring the
+ * link up as "new SuperSpeed USB device" at 5000 Mbit/s; all three other
+ * combinations of the two lines stay at 480 Mbit/s.
+ *
+ * USB3SW_S selects which SS pair set reaches the combophy, i.e. cable
+ * orientation. This board has no Type-C stack (see typec@35), so orientation
+ * cannot be detected and has to be pinned. With S high, SuperSpeed works with
+ * the connector one way up; the other way falls back to USB 2.0, which still
+ * works because D+/D- are duplicated on both sides of the receptacle. That
+ * degradation is graceful and deliberate. If dual-role/Type-C is ever
+ * completed, this hog must be removed and the line handed to the Type-C
+ * orientation handling instead.
+ *
+ * Note "USBSW_OE" is spelled without the 3 in the gpio-line-names list in
+ * the -mx.dtsi, unlike USB3SW_S. Kept consistent with that here.
+ */
+&gpioh {
+	usb3sw-oe-hog {
+		gpio-hog;
+		gpios = <2 GPIO_ACTIVE_HIGH>;
+		output-low;
+		line-name = "USBSW_OE";
+	};
+
+	usb3sw-s-hog {
+		gpio-hog;
+		gpios = <3 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "USB3SW_S";
+	};
+};
+
 &gpu {
 	contiguous-area = <&gpu_reserved>;
 	status = "okay";
