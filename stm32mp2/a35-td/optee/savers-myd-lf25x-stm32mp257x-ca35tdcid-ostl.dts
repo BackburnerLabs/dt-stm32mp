@@ -43,38 +43,6 @@
 };
 
 /*
- * Expose the UCPD supply as an SCMI voltage domain so the Cortex-M33 can turn
- * it on.
- *
- * ST's USBPD_DRP_UCSI firmware does this in MX_UCPD1_Init():
- *
- *   if (ResMgr_Request(RESMGR_RESOURCE_RIF_PWR, RESMGR_PWR_RESOURCE(0)) == OK)
- *       HAL_PWREx_EnableSupply(PWR_PVM_UCPD);
- *   else if (scmi_voltage_domain_enable(&scmi_channel, VOLTD_SCMI_UCPD))
- *       Error_Handler();          <-- spins forever
- *
- * RIF_PWR_RESOURCE(0) is RIF_SEC/RIF_CID1 here and on the DK, so the direct
- * path always fails and the firmware relies on SCMI. Without this domain the
- * SCMI call fails and the firmware hangs inside MX_UCPD1_Init -- before the
- * RTOS starts, so no UCSI task, no "rpmsg_i2c" channel and an empty
- * /sys/class/typec. Confirmed by instrumenting the firmware: a marker after
- * HAL_Init() was reached, the one after MX_UCPD1_Init() never was.
- *
- * The DK gets this from stm32mp25-st-scmi-cfg.dtsi (see its m33-examples
- * variant); the MYIR base this board derives from does not include it. Only
- * the one domain is added rather than that whole file, to avoid disturbing
- * MYIR's existing SCMI configuration. VOLTD_SCMI_UCPD is 5, which does not
- * collide with the STPMIC2 domains MYIR declares (0xb, 0xe, 0x10, 0x12,
- * 0x14, 0x15, 0x16).
- */
-&scmi_regulator {
-	regulator@5 {
-		reg = <VOLTD_SCMI_UCPD>;
-		voltd-supply = <&vdd33ucpd>;
-	};
-};
-
-/*
  * Keep the UCPD 3V3 rail up for the Cortex-M33.
  *
  * myb-stm32mp257x-base.dtsi already sets vdd33ucpd to "okay", but nothing on
