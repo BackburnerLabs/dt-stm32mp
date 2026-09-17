@@ -1,24 +1,6 @@
 // SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
 /*
  * Copyright (C) Savers 2026 - All Rights Reserved
- *
- * Savers MYD-LF25X carrier-board simple interfaces.
- *
- * Pin assignments and alternate functions are taken from STM32CubeMX
- * (Savers.ioc -> CA35/DeviceTree/Savers/kernel/stm32mp257f-savers-mx.dts),
- * for the Cortex-A35 / Linux side only. This is the authoritative source for
- * the AF numbers and electrical pin config below.
- *
- * Scope (simple, low-speed carrier interfaces):
- *   I2C1/2/3/8, USART1/3/6, SPI1/2/3/5, ADC3, TIM4/5/20 PWM, gpio-line-names.
- *
- * NOT taken from CubeMX (left to their existing owners):
- *   - Ethernet, SDMMC1  (SD), SDMMC3 (SDIO), USB, DDR, eMMC, PMIC/RCC (SoM).
- *   - USART2 is the console; it is already configured by the MYiR SoM base.
- *
- * NOTE: CubeMX assigned SPI1, ADC3 and TIM3/16/17 to the Cortex-M33. SPI1 and
- * ADC3 are exposed to Linux here (Zephyr no longer uses them). The quadrature
- * encoder on TIM3/16/17 is left disabled in Linux — see the note near &adc3.
  */
 
 #include <dt-bindings/pwm/pwm.h>
@@ -121,6 +103,22 @@
 			pinmux = <STM32_PINMUX('F', 12, ANALOG)>, /* SPI5_MISO */
 				 <STM32_PINMUX('G', 6, ANALOG)>, /* SPI5_SCK */
 				 <STM32_PINMUX('I', 5, ANALOG)>; /* SPI5_MOSI */
+		};
+	};
+
+	tim2_pins_mx: tim2_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('H', 5, AF7)>, /* TIM2_CH1 (ENC_A) */
+				 <STM32_PINMUX('F', 15, AF7)>, /* TIM2_CH2 (ENC_B) */
+				 <STM32_PINMUX('F', 7, AF7)>; /* TIM2_ETR (ENC_N) */
+			bias-disable;
+		};
+	};
+	tim2_sleep_pins_mx: tim2_sleep_mx-0 {
+		pins {
+			pinmux = <STM32_PINMUX('H', 5, ANALOG)>, /* TIM2_CH1 (ENC_A) */
+				 <STM32_PINMUX('F', 15, ANALOG)>, /* TIM2_CH2 (ENC_B) */
+				 <STM32_PINMUX('F', 7, ANALOG)>; /* TIM2_ETR (ENC_N) */
 		};
 	};
 
@@ -335,48 +333,6 @@
 			pinmux = <STM32_PINMUX('F', 10, ANALOG)>; /* ADC3_INP2 */
 		};
 	};
-
-	tim3_pins_mx: tim3_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('C', 11, AF7)>; /* TIM3_CH1 (encoder A/B) */
-			bias-disable;
-			drive-push-pull;
-			slew-rate = <0>;
-		};
-	};
-	tim3_sleep_pins_mx: tim3_sleep_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('C', 11, ANALOG)>; /* TIM3_CH1 (encoder A/B) */
-		};
-	};
-
-	tim16_pins_mx: tim16_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('H', 6, AF7)>; /* TIM16_CH1N (ENC_N) */
-			bias-disable;
-			drive-push-pull;
-			slew-rate = <0>;
-		};
-	};
-	tim16_sleep_pins_mx: tim16_sleep_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('H', 6, ANALOG)>; /* TIM16_CH1N (ENC_N) */
-		};
-	};
-
-	tim17_pins_mx: tim17_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('H', 7, AF7)>; /* TIM17_CH1 (encoder A/B) */
-			bias-disable;
-			drive-push-pull;
-			slew-rate = <0>;
-		};
-	};
-	tim17_sleep_pins_mx: tim17_sleep_mx-0 {
-		pins {
-			pinmux = <STM32_PINMUX('H', 7, ANALOG)>; /* TIM17_CH1 (encoder A/B) */
-		};
-	};
 };
 
 &pinctrl_z {
@@ -567,19 +523,18 @@
 	};
 };
 
-/*
- * Quadrature encoder (ENC_A=PC11/TIM3_CH1, ENC_B=PH7/TIM17_CH1,
- * ENC_N=PH6/TIM16_CH1N) is intentionally NOT enabled in Linux. TIM16/TIM17 are
- * basic single-channel timers and cannot do hardware quadrature mode, so this
- * is a real-time edge-capture job better suited to the Cortex-M33. Pin groups
- * tim3/tim16/tim17_*_mx remain defined above for reference. Revisit once the
- * encoder ownership is decided (see commit notes / README).
- */
+&timers2 {
+	status = "okay";
+
+	counter {
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&tim2_pins_mx>;
+		pinctrl-1 = <&tim2_sleep_pins_mx>;
+		status = "okay";
+	};
+};
 
 /* ----------------- GPIO line names (from CubeMX labels) ----------------- */
-/* Each entry names a bank line in pin order; the trailing comment gives the
- * pin range, so e.g. PI9 = DOOR_OPEN is readable at a glance. Empty entries
- * are unlabeled or muxed to a peripheral (see the pinctrl groups above). */
 
 &gpioa {
 	gpio-line-names =
@@ -611,9 +566,9 @@
 &gpiof {
 	gpio-line-names =
 		"", "", "", "",							/* PF0-PF3 */
-		"", "", "STM_AX_WAKE2", "ENC_N",		/* PF4-PF7 */
+		"", "", "STM_AX_WAKE2", "",				/* PF4-PF7 (PF7 = ENC_N, TIM2_ETR) */
 		"ADC_ALERT", "SOLENOID1", "", "MOM3",	/* PF8-PF11 */
-		"", "", "", "ENC_B";					/* PF12-PF15 */
+		"", "", "", "";							/* PF12-PF15 (PF15 = ENC_B, TIM2_CH2) */
 };
 
 &gpiog {
@@ -627,7 +582,7 @@
 &gpioh {
 	gpio-line-names =
 		"", "", "USBSW_OE", "USB3SW_S",		/* PH0-PH3 */
-		"LED1", "ENC_A", "", "",			/* PH4-PH7 */
+		"LED1", "", "", "",					/* PH4-PH7 (PH5 = ENC_A, TIM2_CH1) */
 		"STM_AX_WAKE1";						/* PH8 */
 };
 
