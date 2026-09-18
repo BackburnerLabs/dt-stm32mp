@@ -109,16 +109,14 @@
 	tim2_pins_mx: tim2_mx-0 {
 		pins {
 			pinmux = <STM32_PINMUX('H', 5, AF7)>, /* TIM2_CH1 (ENC_A) */
-				 <STM32_PINMUX('F', 15, AF7)>, /* TIM2_CH2 (ENC_B) */
-				 <STM32_PINMUX('F', 7, AF7)>; /* TIM2_ETR (ENC_N) */
+				 <STM32_PINMUX('F', 15, AF7)>; /* TIM2_CH2 (ENC_B) */
 			bias-disable;
 		};
 	};
 	tim2_sleep_pins_mx: tim2_sleep_mx-0 {
 		pins {
 			pinmux = <STM32_PINMUX('H', 5, ANALOG)>, /* TIM2_CH1 (ENC_A) */
-				 <STM32_PINMUX('F', 15, ANALOG)>, /* TIM2_CH2 (ENC_B) */
-				 <STM32_PINMUX('F', 7, ANALOG)>; /* TIM2_ETR (ENC_N) */
+				 <STM32_PINMUX('F', 15, ANALOG)>; /* TIM2_CH2 (ENC_B) */
 		};
 	};
 
@@ -566,7 +564,7 @@
 &gpiof {
 	gpio-line-names =
 		"", "", "", "",							/* PF0-PF3 */
-		"", "", "STM_AX_WAKE2", "",				/* PF4-PF7 (PF7 = ENC_N, TIM2_ETR) */
+		"", "", "STM_AX_WAKE2", "ENC_N",		/* PF4-PF7 */
 		"ADC_ALERT", "SOLENOID1", "", "MOM3",	/* PF8-PF11 */
 		"", "", "", "";							/* PF12-PF15 (PF15 = ENC_B, TIM2_CH2) */
 };
