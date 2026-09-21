@@ -4,6 +4,7 @@
 
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
+#include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/leds/common.h>
 #include <dt-bindings/rtc/rtc-stm32.h>
 #include <dt-bindings/net/ti-dp83867.h>
@@ -294,6 +295,46 @@
 
 &hpdma3 {
 	memory-region = <&hpdma3_lli>;
+};
+
+/*
+ * ADS1015: 12-bit, 4-channel I2C ADC on I2C1 (SCL PG13, SDA PI1), ADDR 0x48
+ */
+&i2c1 {
+	i2c-scl-rising-time-ns = <185>;
+	i2c-scl-falling-time-ns = <20>;
+	clock-frequency = <100000>;
+	status = "okay";
+	/* spare dmas for other usage */
+	/delete-property/dmas;
+	/delete-property/dma-names;
+
+	ads1015: adc@48 {
+		compatible = "ti,ads1015";
+		reg = <0x48>;
+		interrupt-parent = <&gpiof>;
+		interrupts = <8 IRQ_TYPE_LEVEL_LOW>;	/* ADC_ALERT (PF8) */
+		#address-cells = <1>;
+		#size-cells = <0>;
+		#io-channel-cells = <1>;
+		status = "okay";
+
+		channel@4 {
+			reg = <4>;		/* AIN0 vs GND */
+		};
+
+		channel@5 {
+			reg = <5>;		/* AIN1 vs GND */
+		};
+
+		channel@6 {
+			reg = <6>;		/* AIN2 vs GND */
+		};
+
+		channel@7 {
+			reg = <7>;		/* AIN3 vs GND */
+		};
+	};
 };
 
 &i2c2 {
