@@ -541,6 +541,16 @@
 	pinctrl-1 = <&spi1_sleep_pins_mx>;
 	cs-gpios = <&gpiod 0 GPIO_ACTIVE_LOW>;	/* STM_AX_SPI1_CS (PD0) */
 	status = "okay";
+
+	tmc9660@0 {
+		compatible = "rohm,dh2228fv"; /* generic spidev binding */
+		reg = <0>;
+		/* TMC9660 SPI tops out at 16 MHz; 4 MHz is a safe bring-up rate. */
+		spi-max-frequency = <4000000>;
+		/* TMC9660 SPI is mode 3 (CPOL=1, CPHA=1). */
+		spi-cpol;
+		spi-cpha;
+	};
 };
 
 &adc_3 {
